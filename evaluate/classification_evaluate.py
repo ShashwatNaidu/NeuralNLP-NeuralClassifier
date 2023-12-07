@@ -51,7 +51,7 @@ class ClassificationEvaluator(object):
             predict_count: Predict count
             right_count: Right count
         Returns:
-            precision, recall, f_score
+            precision, recall, f_score, jaccard_similarity
         """
         precision, recall, f_score = 0, 0, 0
         if predict_count > 0:
@@ -60,8 +60,10 @@ class ClassificationEvaluator(object):
             recall = right_count / standard_count
         if precision + recall > 0:
             f_score = precision * recall * 2 / (precision + recall)
+        if (predict_count + standard_count - right_count) > 0:
+            jaccard_similarity = right_count / (predict_count + standard_count - right_count)
 
-        return precision, recall, f_score
+        return precision, recall, f_score, jaccard_similarity
 
     @staticmethod
     def _judge_label_in(label_name, label_to_id_maps):
@@ -73,81 +75,90 @@ class ClassificationEvaluator(object):
                     break
         return cnt == len(label_name)
     def calculate_level_performance(
-            self, id_to_label_map, right_count_category, predict_count_category,
-            standard_count_category, other_text='其他',
-            exclude_method="contain"):
-        """Calculate the level performance.
-        Args:
-            id_to_label_map: Label id to label name.
-            other_text: Text to judge the other label.
-            right_count_category: Right count.
-            predict_count_category: Predict count.
-            standard_count_category: Standard count.
-            exclude_method: The method to judge the other label. Can be
-                            contain(label_name contains other_text) or
-                            start(label_name start with other_text).
-        Returns:
-            precision_dict, recall_dict, fscore_dict.
-        """
-        other_label = dict()
-        for _, label_name in id_to_label_map.items():
-            if exclude_method == "contain":
-                if other_text in label_name:
-                    other_label[label_name] = 1
-            elif exclude_method == "start":
-                if label_name.startswith(other_text):
-                    other_label[label_name] = 1
-            else:
-                raise TypeError(
-                    "Cannot find exclude_method: " +
-                    exclude_method)
+        self, id_to_label_map, right_count_category, predict_count_category,
+        standard_count_category, other_text='其他',
+        exclude_method="contain"):
+    """Calculate the level performance.
+    Args:
+        id_to_label_map: Label id to label name.
+        other_text: Text to judge the other label.
+        right_count_category: Right count.
+        predict_count_category: Predict count.
+        standard_count_category: Standard count.
+        exclude_method: The method to judge the other label. Can be
+                        contain(label_name contains other_text) or
+                        start(label_name start with other_text).
+    Returns:
+        precision_dict, recall_dict, fscore_dict, similarity_dict.
+    """
+    other_label = dict()
+    for _, label_name in id_to_label_map.items():
+        if exclude_method == "contain":
+            if other_text in label_name:
+                other_label[label_name] = 1
+        elif exclude_method == "start":
+            if label_name.startswith(other_text):
+                other_label[label_name] = 1
+        else:
+            raise TypeError(
+                "Cannot find exclude_method: " +
+                exclude_method)
 
-        precision_dict = dict()
-        recall_dict = dict()
-        fscore_dict = dict()
-        precision_dict[self.MACRO_AVERAGE] = 0
-        recall_dict[self.MACRO_AVERAGE] = 0
-        fscore_dict[self.MACRO_AVERAGE] = 0
-        right_total = 0
-        predict_total = 0
-        standard_total = 0
+    precision_dict = dict()
+    recall_dict = dict()
+    fscore_dict = dict()
+    similarity_dict = dict()
 
-        for _, label_name in id_to_label_map.items():
-            if label_name in other_label:
-                continue
-            precision_dict[label_name], recall_dict[label_name], \
-                fscore_dict[label_name] = self._calculate_prf(
-                    right_count_category[label_name],
-                    predict_count_category[label_name],
-                    standard_count_category[label_name])
-            right_total += right_count_category[label_name]
-            predict_total += predict_count_category[label_name]
-            standard_total += standard_count_category[label_name]
-            precision_dict[self.MACRO_AVERAGE] += precision_dict[label_name]
-            recall_dict[self.MACRO_AVERAGE] += recall_dict[label_name]
-            fscore_dict[self.MACRO_AVERAGE] += fscore_dict[label_name]
-        num_label_eval = len(id_to_label_map) - len(other_label)
+    precision_dict[self.MACRO_AVERAGE] = 0
+    recall_dict[self.MACRO_AVERAGE] = 0
+    fscore_dict[self.MACRO_AVERAGE] = 0
 
-        precision_dict[self.MACRO_AVERAGE] = \
-            precision_dict[self.MACRO_AVERAGE] / num_label_eval
-        recall_dict[self.MACRO_AVERAGE] = \
-            recall_dict[self.MACRO_AVERAGE] / num_label_eval
-        fscore_dict[self.MACRO_AVERAGE] = 0 \
-            if (recall_dict[self.MACRO_AVERAGE] +
-                precision_dict[self.MACRO_AVERAGE]) == 0 else \
-            2 * precision_dict[self.MACRO_AVERAGE] * \
-            recall_dict[self.MACRO_AVERAGE] / \
-            (recall_dict[self.MACRO_AVERAGE]
-             + precision_dict[self.MACRO_AVERAGE])
+    right_total = 0
+    predict_total = 0
+    standard_total = 0
 
-        right_count_category[self.MICRO_AVERAGE] = right_total
-        predict_count_category[self.MICRO_AVERAGE] = predict_total
-        standard_count_category[self.MICRO_AVERAGE] = standard_total
+    for _, label_name in id_to_label_map.items():
+        if label_name in other_label:
+            continue
 
-        (precision_dict[self.MICRO_AVERAGE], recall_dict[self.MICRO_AVERAGE],
-         fscore_dict[self.MICRO_AVERAGE]) = \
-            self._calculate_prf(right_total, predict_total, standard_total)
-        return precision_dict, recall_dict, fscore_dict
+        precision_dict[label_name], recall_dict[label_name], \
+            fscore_dict[label_name], similarity_dict[label_name] = \
+            self._calculate_prf(right_count_category[label_name],
+                                predict_count_category[label_name],
+                                standard_count_category[label_name])
+
+        right_total += right_count_category[label_name]
+        predict_total += predict_count_category[label_name]
+        standard_total += standard_count_category[label_name]
+
+        precision_dict[self.MACRO_AVERAGE] += precision_dict[label_name]
+        recall_dict[self.MACRO_AVERAGE] += recall_dict[label_name]
+        fscore_dict[self.MACRO_AVERAGE] += fscore_dict[label_name]
+
+    num_label_eval = len(id_to_label_map) - len(other_label)
+
+    precision_dict[self.MACRO_AVERAGE] = \
+        precision_dict[self.MACRO_AVERAGE] / num_label_eval
+    recall_dict[self.MACRO_AVERAGE] = \
+        recall_dict[self.MACRO_AVERAGE] / num_label_eval
+    fscore_dict[self.MACRO_AVERAGE] = 0 \
+        if (recall_dict[self.MACRO_AVERAGE] +
+            precision_dict[self.MACRO_AVERAGE]) == 0 else \
+        2 * precision_dict[self.MACRO_AVERAGE] * \
+        recall_dict[self.MACRO_AVERAGE] / \
+        (recall_dict[self.MACRO_AVERAGE]
+         + precision_dict[self.MACRO_AVERAGE])
+
+    right_count_category[self.MICRO_AVERAGE] = right_total
+    predict_count_category[self.MICRO_AVERAGE] = predict_total
+    standard_count_category[self.MICRO_AVERAGE] = standard_total
+
+    (precision_dict[self.MICRO_AVERAGE], recall_dict[self.MICRO_AVERAGE],
+     fscore_dict[self.MICRO_AVERAGE], similarity_dict[self.MICRO_AVERAGE]) = \
+        self._calculate_prf(right_total, predict_total, standard_total)
+
+    return precision_dict, recall_dict, fscore_dict, similarity_dict
+
 
     def evaluate(self, predicts, standard_label_names=None,
                  standard_label_ids=None, label_map=None, threshold=0, top_k=3,

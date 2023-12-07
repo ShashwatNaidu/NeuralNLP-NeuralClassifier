@@ -19,10 +19,10 @@
     "test_json_files": [
       "/kaggle/input/semeval-json/Semeval_json/semeval_test.json"
     ],
-    "generate_dict_using_json_files": true,
-    "generate_dict_using_all_json_files": true,
+    "generate_dict_using_json_files": false,
+    "generate_dict_using_all_json_files": false,
     "generate_dict_using_pretrained_embedding": false,
-    "generate_hierarchy_label": true,
+    "generate_hierarchy_label": false,
     "dict_dir": "dict_rcv1",
     "num_worker": 4
   },

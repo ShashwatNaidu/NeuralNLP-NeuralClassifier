@@ -258,6 +258,8 @@ class ClassificationEvaluator(object):
         line_count = 0
         debug_file = open("probs.txt", "w", encoding=cDataset.CHARSET)
         total = 0
+        exact = 0
+        jaccard = 0
         for predict in predicts:
             total += 1
             if is_prob:
@@ -292,10 +294,12 @@ class ClassificationEvaluator(object):
                     confusion_matrix_list[0][std_name][pred_name] += 1
             for pred_name in predict_label_name:
                 predict_category_count_list[0][pred_name] += 1
-            print(standard_label_name)
-            print(type(standard_label_name))
-            print(predict_label_name)
-            print(type(predict_label_name))
+            set1 = set(standard_label_name)
+            set2 = set(predict_label_name)
+            if(set1==set2) exact+=1
+            intersection = len(set1.intersection(set2))
+            union = len(set1.union(set2))
+            if union != 0 jaccard += intersection/union
             for std_name in standard_label_name:
                 standard_category_count_list[0][std_name] += 1
                 for pred_name in predict_label_name:
@@ -335,6 +339,8 @@ class ClassificationEvaluator(object):
                                     right_category_count_list[level][pred_label] += 1
 
             line_count += 1
+        self.accuracy = exact/total
+        self.jaccard_sim = jaccard/total
         debug_file.close()
         precision_list = []
         recall_list = []

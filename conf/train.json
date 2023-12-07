@@ -50,7 +50,7 @@
   "train": {
     "batch_size": 64,
     "start_epoch": 1,
-    "num_epochs": 5,
+    "num_epochs": 25,
     "num_epochs_static_embedding": 0,
     "decay_steps": 1000,
     "decay_rate": 1.0,

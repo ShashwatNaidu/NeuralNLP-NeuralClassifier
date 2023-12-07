@@ -38,6 +38,8 @@ class ClassificationEvaluator(object):
         self.right_list = None
         self.predict_list = None
         self.standard_list = None
+        self.accuracy = 0
+        self.jaccard_sim = 0
 
         self.eval_dir = eval_dir
         if not os.path.exists(self.eval_dir):
@@ -255,7 +257,9 @@ class ClassificationEvaluator(object):
 
         line_count = 0
         debug_file = open("probs.txt", "w", encoding=cDataset.CHARSET)
+        total = 0
         for predict in predicts:
+            total += 1
             if is_prob:
                 prob_np = np.array(predict, dtype=np.float32)
                 if not is_multi:
@@ -288,6 +292,10 @@ class ClassificationEvaluator(object):
                     confusion_matrix_list[0][std_name][pred_name] += 1
             for pred_name in predict_label_name:
                 predict_category_count_list[0][pred_name] += 1
+            print(standard_label_name)
+            print(type(standard_label_name))
+            print(predict_label_name)
+            print(type(predict_label_name))
             for std_name in standard_label_name:
                 standard_category_count_list[0][std_name] += 1
                 for pred_name in predict_label_name:

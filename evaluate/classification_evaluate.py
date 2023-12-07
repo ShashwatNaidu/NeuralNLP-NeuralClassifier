@@ -296,10 +296,12 @@ class ClassificationEvaluator(object):
                 predict_category_count_list[0][pred_name] += 1
             set1 = set(standard_label_name)
             set2 = set(predict_label_name)
-            if(set1==set2) exact+=1
+            if(set1==set2): 
+                exact+=1
             intersection = len(set1.intersection(set2))
             union = len(set1.union(set2))
-            if union != 0 jaccard += intersection/union
+            if (union != 0): 
+                jaccard += intersection/union
             for std_name in standard_label_name:
                 standard_category_count_list[0][std_name] += 1
                 for pred_name in predict_label_name:

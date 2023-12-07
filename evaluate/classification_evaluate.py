@@ -373,7 +373,7 @@ class ClassificationEvaluator(object):
                 standard_category_count_list)
         return (confusion_matrix_list, precision_list, recall_list, fscore_list,
                 right_category_count_list, predict_category_count_list,
-                standard_category_count_list)
+                standard_category_count_list, self.accuracy, self.jaccard_sim)
 
     @staticmethod
     def save_confusion_matrix(file_name, confusion_matrix):

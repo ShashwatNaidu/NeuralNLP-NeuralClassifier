@@ -104,12 +104,12 @@
     "cell_hidden_dropout": 0.1
   },
   "eval": {
-    "text_file": "data/rcv1_test.json",
+    "text_file": "/kaggle/input/semeval-json-new/semeval_json_new/semeval_test.json",
     "threshold": 0.5,
     "dir": "eval_dir",
     "batch_size": 1024,
     "is_flat": true,
-    "top_k": 100,
+    "top_k": 12,
     "model_dir": "checkpoint_dir_rcv1/TextCNN_best"
   },
   "TextVDCNN": {

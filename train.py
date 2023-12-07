@@ -164,7 +164,7 @@ class ClassificationTrainer(object):
         if mode == ModeType.EVAL:
             total_loss = total_loss / num_batch
             (_, precision_list, recall_list, fscore_list, right_list,
-             predict_list, standard_list) = \
+             predict_list, standard_list, accuracy, jaccard_sim) = \
                 self.evaluator.evaluate(
                     predict_probs, standard_label_ids=standard_labels, label_map=self.label_map,
                     threshold=self.conf.eval.threshold, top_k=self.conf.eval.top_k,
@@ -173,12 +173,14 @@ class ClassificationTrainer(object):
             # precision_list[1:] save metrices of hierarchical classification
             self.logger.warn(
                 "%s performance at epoch %d is precision: %f, "
-                "recall: %f, fscore: %f, macro-fscore: %f, right: %d, predict: %d, standard: %d.\n"
+                "recall: %f, micro-fscore: %f, macro-fscore: %f, accuracy: %f, jaccard_sim: %f, right: %d, predict: %d, standard: %d.\n"
                 "Loss is: %f." % (
                     stage, epoch, precision_list[0][cEvaluator.MICRO_AVERAGE],
                     recall_list[0][cEvaluator.MICRO_AVERAGE],
                     fscore_list[0][cEvaluator.MICRO_AVERAGE],
                     fscore_list[0][cEvaluator.MACRO_AVERAGE],
+                    accuracy,
+                    jaccard_sim,
                     right_list[0][cEvaluator.MICRO_AVERAGE],
                     predict_list[0][cEvaluator.MICRO_AVERAGE],
                         standard_list[0][cEvaluator.MICRO_AVERAGE], total_loss))

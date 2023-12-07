@@ -52,7 +52,7 @@ def get_data_loader(dataset_name, collate_name, conf):
     """Get data loader: Train, Validate, Test
     """
     train_dataset = globals()[dataset_name](
-        conf, conf.data.train_json_files, generate_dict=False)
+        conf, conf.data.train_json_files, generate_dict=True)
     collate_fn = globals()[collate_name](conf, len(train_dataset.label_map))
 
     train_data_loader = DataLoader(

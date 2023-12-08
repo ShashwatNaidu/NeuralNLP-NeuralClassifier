@@ -11,13 +11,13 @@
   "model_dir": "trained_model_rcv1",
   "data": {
     "train_json_files": [
-      "/kaggle/input/semeval-json-new/semeval_json_new/semeval_train.json"
+      "/kaggle/input/reuters-json/reuters_json/reuters_train.json"
     ],
     "validate_json_files": [
-      "/kaggle/input/semeval-json-new/semeval_json_new/semeval_dev.json"
+      "/kaggle/input/reuters-json/reuters_json/reuters_dev.json"
     ],
     "test_json_files": [
-      "/kaggle/input/semeval-json-new/semeval_json_new/semeval_test.json"
+      "/kaggle/input/reuters-json/reuters_json/reuters_test.json"
     ],
     "generate_dict_using_json_files": true,
     "generate_dict_using_all_json_files": true,
@@ -104,12 +104,12 @@
     "cell_hidden_dropout": 0.1
   },
   "eval": {
-    "text_file": "/kaggle/input/semeval-json-new/semeval_json_new/semeval_test.json",
+    "text_file": "/kaggle/input/reuters-json/reuters_json/reuters_test.json",
     "threshold": 0.5,
     "dir": "eval_dir",
     "batch_size": 1024,
     "is_flat": true,
-    "top_k": 12,
+    "top_k": 90,
     "model_dir": "checkpoint_dir_rcv1/TextCNN_best"
   },
   "TextVDCNN": {

@@ -214,6 +214,8 @@ def train(conf):
         get_data_loader(dataset_name, collate_name, conf)
     empty_dataset = globals()[dataset_name](conf, [], mode="train")
     model = get_classification_model(model_name, empty_dataset, conf)
+    total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Number of trainable parameters: {total_params}")
     loss_fn = globals()["ClassificationLoss"](
         label_size=len(empty_dataset.label_map), loss_type=conf.train.loss_type)
     optimizer = get_optimizer(conf, model)
